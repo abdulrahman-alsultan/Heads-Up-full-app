@@ -1,5 +1,6 @@
 package com.example.headsup
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +28,17 @@ class RecyclerViewAdapter(private val celebrityList: List<CelebrityDataItem>): R
             taboo1.text = celebrity.taboo1
             taboo2.text = celebrity.taboo2
             taboo3.text = celebrity.taboo3
+
+            recyclerView.setOnClickListener {
+                val intent = Intent(holder.itemView.context, UpdateDeleteCelebrity::class.java)
+                intent.putExtra("id", celebrity.pk)
+                intent.putExtra("name", celebrity.name)
+                intent.putExtra("taboo1", celebrity.taboo1)
+                intent.putExtra("taboo2", celebrity.taboo2)
+                intent.putExtra("taboo3",  celebrity.taboo3)
+
+                holder.itemView.context.startActivity(intent)
+            }
         }
     }
 

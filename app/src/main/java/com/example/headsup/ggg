@@ -1,0 +1,120 @@
+package com.example.headsup
+
+import android.content.SharedPreferences
+import android.content.res.Configuration
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
+class GameActivity : AppCompatActivity() {
+
+    lateinit var sharedPreferences: SharedPreferences
+    private lateinit var list: MutableList<List<String>>
+
+    private lateinit var txt: TextView
+    private lateinit var tvScore: TextView
+    private lateinit var cName: TextView
+    private lateinit var t1: TextView
+    private lateinit var t2: TextView
+    private lateinit var t3: TextView
+    private lateinit var linear: LinearLayout
+    private lateinit var linear1: LinearLayout
+
+    private var size2 = 0
+    private var randoms = arrayListOf<Int>()
+    private var idx2 = 0
+    private var score = 0
+
+
+
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_game)
+
+        this.title = "Time: "
+
+        sharedPreferences = getSharedPreferences("Alsultan_Heads_up_game", MODE_PRIVATE)
+        val edit = sharedPreferences.edit()
+        txt = findViewById(R.id.txt)
+        tvScore = findViewById(R.id.score)
+        cName = findViewById(R.id.name)
+        t1 = findViewById(R.id.t1)
+        t2 = findViewById(R.id.t2)
+        t3 = findViewById(R.id.t3)
+        linear = findViewById(R.id.linearLayout)
+        linear1 = findViewById(R.id.linear1)
+
+        list = mutableListOf()
+        var size = intent.getIntExtra("size", -1)
+        size2 = size
+        for (i in 0 until size) {
+            intent.getStringExtra("c$i")?.split("|||")?.let { list.add(it) }
+            val edit = sharedPreferences.edit()
+            edit.putString("c$i", "${list[i][0]}|||${list[i][1]}|||${list[i][2]}|||${list[i][3]}")
+            edit.apply()
+        }
+        val idx = sharedPreferences.getInt("idx", 0)
+        idx2 = idx
+        score = sharedPreferences.getInt("score", 0)
+
+        randoms = (0..size).shuffled().take(size) as ArrayList<Int>
+
+
+        for(i in 0 until size)
+            edit.putInt("r$i", randoms[i])
+        edit.apply()
+        tvScore.text = "Your score: $size/$score"
+    }
+
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        if(size2 > idx2){
+            if (newConfig.orientation === Configuration.ORIENTATION_LANDSCAPE) {
+                idx2 = sharedPreferences.getInt("idx", 0)
+                val rnd = sharedPreferences.getInt("r$idx2", -1)
+                size2 = intent.getIntExtra("size", -1)
+                val selectedItem = sharedPreferences.getString("c$rnd", "")!!.split("|||")
+
+                if(rnd != -1){
+                    score = sharedPreferences.getInt("score", 0)
+
+                    Log.d("Printtt", selectedItem.toString())
+
+                    cName.text = selectedItem[0]
+                    t1.text = selectedItem[1]
+                    t2.text = selectedItem[2]
+                    t3.text = selectedItem[3]
+                    linear.visibility = View.VISIBLE
+                    linear1.visibility = View.GONE
+                }
+
+            } else if (newConfig.orientation === Configuration.ORIENTATION_PORTRAIT) {
+
+                idx2 = sharedPreferences.getInt("idx", 0)
+                idx2++
+                score++
+                linear.visibility = View.GONE
+                linear1.visibility = View.VISIBLE
+                val edit = sharedPreferences.edit()
+                edit.putInt("idx", idx2)
+                edit.putInt("score", score)
+                edit.apply()
+                tvScore.text = "Your score: $size2/$score"
+
+            }
+        }
+        else{
+            txt.text = "Game finish"
+            linear1.visibility = View.VISIBLE
+            tvScore.text = "Your score: $size2/$score"
+        }
+    }
+
+}
